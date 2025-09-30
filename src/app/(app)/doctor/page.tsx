@@ -26,6 +26,19 @@ const diagnosisSchema = z.object({
   medication: z.string().min(3, 'Medication recommendation is required.'),
 });
 
+const SymptomList = ({ symptoms }: { symptoms?: string }) => {
+  if (!symptoms) return null;
+  const symptomPoints = symptoms.split(/, ?|\n/g).filter(s => s.trim().length > 0);
+  return (
+    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+      {symptomPoints.map((symptom, index) => (
+        <li key={index}>{symptom.trim()}</li>
+      ))}
+    </ul>
+  );
+};
+
+
 export default function DoctorPage() {
   const { patients, updatePatient } = usePatients();
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null);
@@ -167,7 +180,7 @@ export default function DoctorPage() {
                   <Separator />
                   <div>
                     <p className="font-medium">Symptoms Reported</p>
-                    <p className="text-muted-foreground">{patientInSheet.symptoms}</p>
+                     <SymptomList symptoms={patientInSheet.symptoms} />
                   </div>
                   {patientInSheet.medicalHistory && <>
                     <Separator />
@@ -195,7 +208,7 @@ export default function DoctorPage() {
                         </div>
                         {isAiLoading && <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" /></div>}
                         {patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
-                            <p className="text-sm text-muted-foreground">{patientInSheet.aiSuggestedDiagnosis}</p>
+                            <p className="text-sm text-muted-foreground">{patientInSheet.aiSuggesteddiagnosis}</p>
                         )}
                         {!patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
                             <p className="text-sm text-muted-foreground">Click 'Get Suggestion' to use AI to analyze patient data.</p>

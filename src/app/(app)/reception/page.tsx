@@ -349,7 +349,7 @@ export default function ReceptionPage() {
               <FormField control={vitalsForm.control} name="symptoms" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Symptoms</FormLabel>
-                  <FormControl><Textarea placeholder="Describe patient's symptoms..." {...field} /></FormControl>
+                  <FormControl><Textarea placeholder="e.g., Headache, Fever, Cough" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}/>
