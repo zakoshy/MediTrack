@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import type { Patient } from '@/lib/types';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,7 +42,7 @@ const SymptomList = ({ symptoms }: { symptoms?: string }) => {
 export default function DoctorPage() {
   const { patients, updatePatient, isLoading: arePatientsLoading } = usePatients();
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null);
-  const [isSheetOpen, setSheetOpen] = React.useState(false);
+  const [isDialogOpen, setDialogOpen] = React.useState(false);
   const [isAiLoading, setIsAiLoading] = React.useState(false);
 
   const diagnosisForm = useForm<z.infer<typeof diagnosisSchema>>({
@@ -52,7 +52,7 @@ export default function DoctorPage() {
 
   const waitingPatients = patients.filter(p => p.status === 'Waiting for Doctor');
 
-  const handleOpenSheet = (patient: Patient) => {
+  const handleOpenDialog = (patient: Patient) => {
     setSelectedPatient(patient);
     diagnosisForm.reset({
       diagnosis: patient.diagnosis || '',
@@ -62,7 +62,7 @@ export default function DoctorPage() {
     if (patient.aiSuggestedDiagnosis) {
       updatePatient(patient.id, { aiSuggestedDiagnosis: '' });
     }
-    setSheetOpen(true);
+    setDialogOpen(true);
   };
 
   const handleGetAiSuggestion = async () => {
@@ -98,13 +98,13 @@ export default function DoctorPage() {
         dischargedAt: new Date().toISOString(),
       });
       toast({ title: 'Patient Discharged', description: `${selectedPatient.name} has been discharged.` });
-      setSheetOpen(false);
+      setDialogOpen(false);
       setSelectedPatient(null);
     }
   };
   
-  // To update sheet content when AI suggestion arrives via context
-  const patientInSheet = patients.find(p => p.id === selectedPatient?.id) || selectedPatient;
+  // To update dialog content when AI suggestion arrives via context
+  const patientInDialog = patients.find(p => p.id === selectedPatient?.id) || selectedPatient;
 
   return (
     <div className="space-y-6">
@@ -157,7 +157,7 @@ export default function DoctorPage() {
                   <TableCell>{patient.age}</TableCell>
                   <TableCell className="max-w-xs truncate">{patient.symptoms}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenSheet(patient)}>
+                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(patient)}>
                       Review Patient
                     </Button>
                   </TableCell>
@@ -172,38 +172,38 @@ export default function DoctorPage() {
         </CardContent>
       </Card>
       
-      <Sheet open={isSheetOpen} onOpenChange={(isOpen) => { setSheetOpen(isOpen); if (!isOpen) setSelectedPatient(null); }}>
-        <SheetContent className="sm:max-w-2xl w-full p-0 flex flex-col">
-          {patientInSheet ? (
+      <Dialog open={isDialogOpen} onOpenChange={(isOpen) => { setDialogOpen(isOpen); if (!isOpen) setSelectedPatient(null); }}>
+        <DialogContent className="sm:max-w-4xl p-0">
+          {patientInDialog ? (
           <>
-            <SheetHeader className="p-6">
-              <SheetTitle className="text-2xl">Patient File: {patientInSheet.name}</SheetTitle>
-              <SheetDescription>
-                Age: {patientInSheet.age} | Gender: {patientInSheet.gender} | Contact: {patientInSheet.contact}
-              </SheetDescription>
-            </SheetHeader>
-            <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-6">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-2xl">Patient File: {patientInDialog.name}</DialogTitle>
+              <DialogDescription>
+                Age: {patientInDialog.age} | Gender: {patientInDialog.gender} | Contact: {patientInDialog.contact}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[70vh] overflow-y-auto px-6 space-y-6 pb-6">
               <Card>
                 <CardHeader><CardTitle>Vitals & Symptoms</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {patientInSheet.vitals && (
+                  {patientInDialog.vitals && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div><p className="text-muted-foreground">Temperature</p><p>{patientInSheet.vitals.temperature}</p></div>
-                      <div><p className="text-muted-foreground">Blood Pressure</p><p>{patientInSheet.vitals.bloodPressure}</p></div>
-                      <div><p className="text-muted-foreground">Heart Rate</p><p>{patientInSheet.vitals.heartRate}</p></div>
-                      <div><p className="text-muted-foreground">Resp. Rate</p><p>{patientInSheet.vitals.respiratoryRate}</p></div>
+                      <div><p className="text-muted-foreground">Temperature</p><p>{patientInDialog.vitals.temperature}</p></div>
+                      <div><p className="text-muted-foreground">Blood Pressure</p><p>{patientInDialog.vitals.bloodPressure}</p></div>
+                      <div><p className="text-muted-foreground">Heart Rate</p><p>{patientInDialog.vitals.heartRate}</p></div>
+                      <div><p className="text-muted-foreground">Resp. Rate</p><p>{patientInDialog.vitals.respiratoryRate}</p></div>
                     </div>
                   )}
                   <Separator />
                   <div>
                     <p className="font-medium">Symptoms Reported</p>
-                     <SymptomList symptoms={patientInSheet.symptoms} />
+                     <SymptomList symptoms={patientInDialog.symptoms} />
                   </div>
-                  {patientInSheet.medicalHistory && <>
+                  {patientInDialog.medicalHistory && <>
                     <Separator />
                     <div>
                       <p className="font-medium">Medical History</p>
-                      <p className="text-muted-foreground">{patientInSheet.medicalHistory}</p>
+                      <p className="text-muted-foreground">{patientInDialog.medicalHistory}</p>
                     </div>
                   </>}
                 </CardContent>
@@ -224,10 +224,10 @@ export default function DoctorPage() {
                             </Button>
                         </div>
                         {isAiLoading && <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" /></div>}
-                        {patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
-                            <p className="text-sm text-muted-foreground">{patientInSheet.aiSuggestedDiagnosis}</p>
+                        {patientInDialog.aiSuggestedDiagnosis && !isAiLoading && (
+                            <p className="text-sm text-muted-foreground">{patientInDialog.aiSuggestedDiagnosis}</p>
                         )}
-                        {!patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
+                        {!patientInDialog.aiSuggestedDiagnosis && !isAiLoading && (
                             <p className="text-sm text-muted-foreground">Click 'Get Suggestion' to use AI to analyze patient data.</p>
                         )}
                      </div>
@@ -248,10 +248,10 @@ export default function DoctorPage() {
                             <FormMessage />
                           </FormItem>
                         )}/>
-                        <SheetFooter className="pt-4 bg-background sticky bottom-0 py-4">
-                          <SheetClose asChild><Button variant="ghost">Cancel</Button></SheetClose>
+                        <DialogFooter className="pt-4 bg-background sticky bottom-0 py-4 px-6 border-t">
+                          <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
                           <Button type="submit"><Send className="mr-2 h-4 w-4" /> Save & Discharge</Button>
-                        </SheetFooter>
+                        </DialogFooter>
                       </form>
                     </Form>
                   </div>
@@ -264,8 +264,8 @@ export default function DoctorPage() {
               <p>Please select a patient to review.</p>
             </div>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
