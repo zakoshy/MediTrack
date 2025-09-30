@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -22,7 +21,7 @@ const heroImages = [
 
 export default function WebHomepage() {
   const plugin = React.useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
+    Autoplay({ delay: 5000, stopOnInteraction: true })
   );
   
   return (
@@ -110,5 +109,3 @@ export default function WebHomepage() {
     </div>
   );
 }
-
-    
