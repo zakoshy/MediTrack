@@ -297,6 +297,7 @@ const UpdatePatientSchema = z.object({
   diagnosis: z.string().optional(),
   medication: z.string().optional(),
   dischargedAt: z.string().datetime().optional(),
+  aiSuggestedDiagnosis: z.string().optional(),
 });
 
 
