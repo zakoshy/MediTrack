@@ -16,11 +16,14 @@ export default function WebHomepage() {
           <span className="ml-2 text-xl font-semibold font-headline">MediTrack</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link href="/login?redirect=/reception" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/login?role=Receptionist" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             Reception
           </Link>
-          <Link href="/login?redirect=/doctor" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="/login?role=Doctor" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
             Doctor
+          </Link>
+           <Link href="/login?role=Admin" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Admin
           </Link>
         </nav>
       </header>
@@ -48,14 +51,14 @@ export default function WebHomepage() {
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Link
-                  href="/login?redirect=/reception"
+                  href="/login?role=Receptionist"
                   className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                   prefetch={false}
                 >
-                  Reception Login
+                  Receptionist Login
                 </Link>
                 <Link
-                  href="/login?redirect=/doctor"
+                  href="/login?role=Doctor"
                   className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background/80 backdrop-blur-sm px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                   prefetch={false}
                 >

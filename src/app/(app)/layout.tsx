@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, Stethoscope, Pill, PanelLeft, Search } from 'lucide-react';
+import { ClipboardList, Stethoscope, Pill, PanelLeft, Shield, UserPlus } from 'lucide-react';
 
 import { PatientProvider } from '@/contexts/patient-context';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,7 @@ const navItems = [
   { href: '/reception', label: 'Reception', icon: ClipboardList },
   { href: '/doctor', label: "Doctor's Queue", icon: Stethoscope },
   { href: '/medication-search', label: 'Medication Search', icon: Pill },
+  { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

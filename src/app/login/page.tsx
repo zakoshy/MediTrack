@@ -15,21 +15,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
+  role: z.enum(['Admin', 'Doctor', 'Receptionist']),
 });
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/reception';
+  const defaultRole = searchParams.get('role');
+  
+  const getRedirectUrl = (role: string) => {
+    switch (role) {
+        case 'Admin': return '/admin';
+        case 'Doctor': return '/doctor';
+        case 'Receptionist': return '/reception';
+        default: return '/';
+    }
+  }
+
   const [showPassword, setShowPassword] = React.useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', password: '', role: defaultRole as any || undefined },
   });
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -43,7 +62,7 @@ export default function LoginPage() {
 
     // We use a timeout to allow the user to see the toast message.
     setTimeout(() => {
-      router.push(redirectUrl);
+      router.push(getRedirectUrl(values.role));
     }, 1000);
   };
 
@@ -67,12 +86,34 @@ export default function LoginPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>I am a...</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Doctor">Doctor</SelectItem>
+                          <SelectItem value="Receptionist">Receptionist</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="doctor@meditrack.com" {...field} />
+                        <Input type="email" placeholder="user@meditrack.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
