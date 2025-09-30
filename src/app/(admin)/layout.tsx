@@ -1,9 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, Stethoscope, Pill, PanelLeft, Shield } from 'lucide-react';
+import { PanelLeft, Shield } from 'lucide-react';
 
-import { PatientProvider } from '@/contexts/patient-context';
 import {
   SidebarProvider,
   Sidebar,
@@ -19,12 +18,10 @@ import { Button } from '@/components/ui/button';
 import { MediTrackLogo } from '@/components/icons';
 
 const navItems = [
-  { href: '/reception', label: 'Reception', icon: ClipboardList },
-  { href: '/doctor', label: "Doctor's Queue", icon: Stethoscope },
-  { href: '/medication-search', label: 'Medication Search', icon: Pill },
+  { href: '/admin', label: 'User Management', icon: Shield },
 ];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
   const sidebarContent = (
@@ -61,28 +58,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <PatientProvider>
-      <SidebarProvider>
-        <Sidebar collapsible="icon">{sidebarContent}</Sidebar>
-        <SidebarInset>
-            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-card px-4 sm:h-16 sm:px-6">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="md:hidden" />
-                 <Link href="/" className="flex items-center gap-2 md:hidden">
-                    <MediTrackLogo className="h-6 w-6 text-primary" />
-                    <h1 className="font-headline text-lg font-semibold">MediTrack</h1>
-                 </Link>
-              </div>
-              <div className="flex-1">
-                 {/* Can add a global search or other header items here */}
-              </div>
-              <Button asChild variant="outline">
-                <Link href="/login?role=Admin">Admin Panel</Link>
-              </Button>
-            </header>
-            <main className="flex-1 p-4 sm:p-6">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
-    </PatientProvider>
+    <SidebarProvider>
+      <Sidebar collapsible="icon">{sidebarContent}</Sidebar>
+      <SidebarInset>
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-card px-4 sm:h-16 sm:px-6">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="md:hidden" />
+               <Link href="/" className="flex items-center gap-2 md:hidden">
+                  <MediTrackLogo className="h-6 w-6 text-primary" />
+                  <h1 className="font-headline text-lg font-semibold">MediTrack</h1>
+               </Link>
+            </div>
+            <div className="flex-1">
+               {/* Can add a global search or other header items here */}
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/reception">Main App</Link>
+            </Button>
+          </header>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
