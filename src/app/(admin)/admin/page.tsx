@@ -3,18 +3,37 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Shield, KeyRound, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Shield, KeyRound, UserPlus, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { createUser, getUsers, changePassword } from '@/app/actions';
+import { createUser, getUsers, changePassword, deleteUser } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const userSchema = z.object({
@@ -46,7 +65,9 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isUserDialogOpen, setUserDialogOpen] = React.useState(false);
   const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = React.useState<User | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
 
   const fetchUsers = React.useCallback(async () => {
@@ -105,6 +126,25 @@ export default function AdminPage() {
         setPasswordDialogOpen(false);
         setSelectedUser(null);
       }
+    }
+  };
+  
+  const handleOpenDeleteDialog = (user: User) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    if (userToDelete) {
+      const result = await deleteUser({ userId: userToDelete._id });
+      if (result.error) {
+        toast({ variant: 'destructive', title: 'Error Deleting User', description: result.error });
+      } else {
+        toast({ title: 'User Deleted', description: `${userToDelete.name} has been removed.` });
+        fetchUsers(); // Refresh user list
+      }
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -236,11 +276,14 @@ export default function AdminPage() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                     <Skeleton className="h-4 w-1/2 mx-auto" />
-                  </TableCell>
-                </TableRow>
+                Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-48 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
               ) : users.length > 0 ? (
                 users.map((user) => (
                   <TableRow key={user._id}>
@@ -251,13 +294,21 @@ export default function AdminPage() {
                         {user.role}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
+                    <TableCell className="text-right space-x-2">
+                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenPasswordDialog(user)}
                       >
                         <KeyRound className="mr-2 h-4 w-4" /> Change Password
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleOpenDeleteDialog(user)}
+                        disabled={user.role === 'Admin'}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -322,6 +373,25 @@ export default function AdminPage() {
           </Form>
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the account for{' '}
+              <span className="font-semibold">{userToDelete?.name}</span> and remove their data
+              from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90">
+              Yes, delete user
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

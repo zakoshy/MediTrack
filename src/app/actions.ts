@@ -130,3 +130,37 @@ export async function changePassword(formData: z.infer<typeof ChangePasswordSche
     return { error: 'Failed to change password.' };
   }
 }
+
+const DeleteUserSchema = z.object({
+  userId: z.string(),
+});
+
+export async function deleteUser(formData: z.infer<typeof DeleteUserSchema>) {
+  try {
+    const validation = DeleteUserSchema.safeParse(formData);
+    if (!validation.success) {
+      return { error: 'Invalid data.' };
+    }
+
+    const { userId } = formData;
+    const client = await clientPromise;
+    const db = client.db();
+    const { ObjectId } = await import('mongodb');
+
+    const userToDelete = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+    if (userToDelete && userToDelete.role === 'Admin') {
+      return { error: 'Cannot delete an admin account.' };
+    }
+
+    const result = await db.collection('users').deleteOne({ _id: new ObjectId(userId) });
+
+    if (result.deletedCount === 0) {
+      return { error: 'User not found.' };
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to delete user.' };
+  }
+}
