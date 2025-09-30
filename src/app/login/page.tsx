@@ -1,0 +1,109 @@
+
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { LogIn } from 'lucide-react';
+
+import { MediTrackLogo } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+});
+
+export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/reception';
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = (values: z.infer<typeof loginSchema>) => {
+    // In a real app, you'd perform authentication here.
+    // For this prototype, we'll just show a success message and redirect.
+    console.log('Login successful with:', values);
+    toast({
+      title: 'Login Successful',
+      description: 'Redirecting to your dashboard...',
+    });
+
+    // We use a timeout to allow the user to see the toast message.
+    setTimeout(() => {
+      router.push(redirectUrl);
+    }, 1000);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen items-center justify-center bg-background p-4">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center text-center mb-6">
+           <Link href="/" className="flex items-center gap-2 mb-4">
+            <MediTrackLogo className="h-10 w-10 text-primary" />
+            <h1 className="text-2xl font-semibold font-headline">MediTrack</h1>
+          </Link>
+          <p className="text-muted-foreground">Welcome back! Please sign in to your account.</p>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign In</CardTitle>
+            <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="doctor@meditrack.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
+                   <LogIn className="ml-2 h-4 w-4"/>
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+        <div className="text-center mt-4">
+          <Link href="/" className="text-sm text-muted-foreground hover:underline">
+            Back to Homepage
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
