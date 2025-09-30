@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,27 +15,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
-  role: z.enum(['Admin', 'Doctor', 'Receptionist']),
 });
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const defaultRole = searchParams.get('role');
-  
-  const getRedirectUrl = (role: string) => {
+
+  // For now, we assume login is for an admin and redirect to the admin dashboard.
+  // This can be updated later to handle different roles.
+  const getRedirectUrl = (role: string = 'Admin') => {
     switch (role) {
         case 'Admin': return '/admin';
         case 'Doctor': return '/doctor';
@@ -48,7 +39,7 @@ export default function LoginPage() {
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '', role: defaultRole as any || undefined },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -62,7 +53,8 @@ export default function LoginPage() {
 
     // We use a timeout to allow the user to see the toast message.
     setTimeout(() => {
-      router.push(getRedirectUrl(values.role));
+      // Hardcoding to 'Admin' for now
+      router.push(getRedirectUrl('Admin'));
     }, 1000);
   };
 
@@ -79,33 +71,11 @@ export default function LoginPage() {
         <Card>
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
-            <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+            <CardDescription>Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>I am a...</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                          <SelectItem value="Doctor">Doctor</SelectItem>
-                          <SelectItem value="Receptionist">Receptionist</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="email"
@@ -113,7 +83,7 @@ export default function LoginPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="user@meditrack.com" {...field} />
+                        <Input type="email" placeholder="admin@meditrack.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

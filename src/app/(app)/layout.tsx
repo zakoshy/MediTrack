@@ -77,7 +77,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                  {/* Can add a global search or other header items here */}
               </div>
               <Button asChild variant="outline">
-                <Link href="/login?role=Admin">Admin Panel</Link>
+                <Link href="/admin">Admin Panel</Link>
               </Button>
             </header>
             <main className="flex-1 p-4 sm:p-6">{children}</main>
