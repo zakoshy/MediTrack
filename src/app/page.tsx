@@ -29,6 +29,7 @@ export default function WebHomepage() {
             data-ai-hint="hospital team"
             className="object-cover z-0"
           />
+          <div className="absolute inset-0 bg-black/30 z-0" />
           <div className="relative container px-4 md:px-6 z-10">
             <div className="flex flex-col items-center justify-center text-center space-y-4">
               <div className="space-y-2">
@@ -36,7 +37,7 @@ export default function WebHomepage() {
                  Your Clinic is MediTrack
                 </h1>
                 <p className="max-w-[600px] text-gray-200 md:text-xl">
-                  An intelligen hospital management system designed to optimize patient flow and improve clinical decision-making.
+                  An intelligent hospital management system designed to optimize patient flow and improve clinical decision-making.
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
