@@ -179,7 +179,7 @@ export default function DoctorPage() {
             <SheetHeader className="p-6">
               <SheetTitle className="text-2xl">Patient File: {patientInSheet.name}</SheetTitle>
               <SheetDescription>
-                Age: {patientInSheet.age} | Gender: {patientInPatient.gender} | Contact: {patientInSheet.contact}
+                Age: {patientInSheet.age} | Gender: {patientInSheet.gender} | Contact: {patientInSheet.contact}
               </SheetDescription>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-6">
