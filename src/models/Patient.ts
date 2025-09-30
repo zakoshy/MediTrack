@@ -16,6 +16,7 @@ export const PatientSchema = z.object({
   avatarUrl: z.string().url(),
   registeredAt: z.string().datetime(),
   status: z.enum(['Waiting for Triage', 'Waiting for Doctor', 'Discharged']),
+  paid: z.boolean().optional(),
   medicalHistory: z.string().optional(),
   vitals: VitalsSchema.optional(),
   symptoms: z.string().optional(),

@@ -1,7 +1,7 @@
 
 'use client';
 import * as React from 'react';
-import { PlusCircle, Stethoscope, Search } from 'lucide-react';
+import { PlusCircle, Stethoscope, Search, CreditCard } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -63,6 +64,7 @@ const vitalsSchema = z.object({
   heartRate: z.string().min(1, 'Required'),
   respiratoryRate: z.string().min(1, 'Required'),
   symptoms: z.string().min(10, 'Please provide detailed symptoms.'),
+  paid: z.boolean().default(false).refine(val => val === true, { message: "Payment must be confirmed to proceed." }),
 });
 
 export default function ReceptionPage() {
@@ -79,6 +81,14 @@ export default function ReceptionPage() {
 
   const vitalsForm = useForm<z.infer<typeof vitalsSchema>>({
     resolver: zodResolver(vitalsSchema),
+    defaultValues: {
+      temperature: '',
+      bloodPressure: '',
+      heartRate: '',
+      respiratoryRate: '',
+      symptoms: '',
+      paid: false,
+    }
   });
 
   const handleRegisterPatient = (values: z.infer<typeof patientSchema>) => {
@@ -89,22 +99,24 @@ export default function ReceptionPage() {
   
   const handleOpenVitalsDialog = (patient: Patient) => {
     setSelectedPatient(patient);
-    vitalsForm.reset(patient.vitals ? {...patient.vitals, symptoms: patient.symptoms} : {
+    vitalsForm.reset(patient.vitals ? { ...patient.vitals, symptoms: patient.symptoms, paid: patient.paid || false } : {
       temperature: '',
       bloodPressure: '',
       heartRate: '',
       respiratoryRate: '',
       symptoms: '',
+      paid: false,
     });
     setVitalsDialogOpen(true);
   };
 
   const handleAddVitals = (values: z.infer<typeof vitalsSchema>) => {
     if (selectedPatient) {
-      const { symptoms, ...vitals } = values;
+      const { symptoms, paid, ...vitals } = values;
       updatePatient(selectedPatient.id, {
         vitals,
         symptoms,
+        paid,
         status: 'Waiting for Doctor',
       });
       setVitalsDialogOpen(false);
@@ -330,9 +342,27 @@ export default function ReceptionPage() {
                   <FormMessage />
                 </FormItem>
               )}/>
+               <FormField
+                control={vitalsForm.control}
+                name="paid"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="flex items-center gap-2"><CreditCard /> Confirm Payment</FormLabel>
+                       <FormMessage />
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <DialogFooter>
                 <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
-                <Button type="submit">Refer to Doctor</Button>
+                <Button type="submit" disabled={!vitalsForm.formState.isValid}>Refer to Doctor</Button>
               </DialogFooter>
             </form>
           </Form>

@@ -18,6 +18,7 @@ export type Patient = {
   avatarUrl: string;
   registeredAt: string;
   status: PatientStatus;
+  paid?: boolean;
   medicalHistory?: string;
   vitals?: Vitals;
   symptoms?: string;

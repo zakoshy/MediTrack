@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import type { Patient } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
-import { getPatients, createPatient } from '@/app/actions';
+import { getPatients, createPatient, updatePatientDetails } from '@/app/actions';
 
 interface PatientContextType {
   patients: Patient[];
@@ -62,16 +62,27 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updatePatient = (id: string, updatedData: Partial<Patient>) => {
-    // This needs to be updated to persist to DB as well.
-    // For now, it optimistically updates the UI.
+  const updatePatient = async (id: string, updatedData: Partial<Patient>) => {
+    // Optimistically update the UI
     setPatients(prev =>
       prev.map(p => (p.id === id ? { ...p, ...updatedData } : p))
     );
-     toast({
-      title: 'Patient Record Updated',
-      description: `Changes for patient ${id} have been saved.`,
-    });
+
+    const result = await updatePatientDetails({ patientId: id, ...updatedData });
+    if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Update Failed',
+        description: result.error,
+      });
+      // Revert the optimistic update on error
+      fetchPatients();
+    } else {
+      toast({
+        title: 'Patient Record Updated',
+        description: `Changes for patient ${patients.find(p=>p.id === id)?.name} have been saved.`,
+      });
+    }
   };
 
   return (

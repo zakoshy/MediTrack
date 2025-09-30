@@ -7,7 +7,7 @@ import { z } from 'zod';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import { UserSchema } from '@/models/User';
-import { PatientSchema } from '@/models/Patient';
+import { PatientSchema, VitalsSchema } from '@/models/Patient';
 
 const diagnosisSchema = z.object({
   symptoms: z.string(),
@@ -285,5 +285,48 @@ export async function getPatients() {
   } catch (e) {
     console.error(e);
     return { error: 'Failed to fetch patients.' };
+  }
+}
+
+const UpdatePatientSchema = z.object({
+  patientId: z.string(),
+  vitals: VitalsSchema.optional(),
+  symptoms: z.string().optional(),
+  status: z.enum(['Waiting for Triage', 'Waiting for Doctor', 'Discharged']).optional(),
+  paid: z.boolean().optional(),
+  diagnosis: z.string().optional(),
+  medication: z.string().optional(),
+  dischargedAt: z.string().datetime().optional(),
+});
+
+
+export async function updatePatientDetails(formData: Partial<z.infer<typeof PatientSchema>> & { patientId: string }) {
+  try {
+    const validation = UpdatePatientSchema.safeParse(formData);
+    if (!validation.success) {
+      console.log(validation.error.errors)
+      return { error: 'Invalid patient update data.' };
+    }
+    
+    const { patientId, ...updateData } = validation.data;
+
+    const client = await clientPromise;
+    const db = client.db();
+    const { ObjectId } = await import('mongodb');
+
+    const result = await db
+      .collection('patients')
+      .updateOne({ _id: new ObjectId(patientId) }, { $set: updateData });
+
+    if (result.modifiedCount === 0) {
+      // It's not necessarily an error if nothing was modified.
+      // Could mean the data was the same.
+      // return { error: 'Patient not found or data is the same.' };
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to update patient details.' };
   }
 }
