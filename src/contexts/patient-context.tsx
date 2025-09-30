@@ -11,7 +11,7 @@ interface PatientContextType {
   isLoading: boolean;
   getPatientById: (id: string) => Patient | undefined;
   addPatient: (patient: Omit<Patient, 'id' | 'registeredAt' | 'status' | 'avatarUrl' | '_id'>) => void;
-  updatePatient: (id: string, updatedData: Partial<Patient>) => void;
+  updatePatient: (id: string, updatedData: Partial<Omit<Patient, 'id' | '_id'>>) => void;
 }
 
 const PatientContext = createContext<PatientContextType | undefined>(undefined);
@@ -62,7 +62,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updatePatient = async (id: string, updatedData: Partial<Patient>) => {
+  const updatePatient = async (id: string, updatedData: Partial<Omit<Patient, 'id' | '_id'>>) => {
     // Optimistically update the UI
     setPatients(prev =>
       prev.map(p => (p.id === id ? { ...p, ...updatedData } : p))
@@ -78,10 +78,14 @@ export function PatientProvider({ children }: { children: ReactNode }) {
       // Revert the optimistic update on error
       fetchPatients();
     } else {
-      toast({
-        title: 'Patient Record Updated',
-        description: `Changes for patient ${patients.find(p=>p.id === id)?.name} have been saved.`,
-      });
+      // Do not show success toast on every minor update (like clearing AI suggestion)
+      // Only show for major status changes or discharges.
+      if(updatedData.status || updatedData.diagnosis) {
+         toast({
+          title: 'Patient Record Updated',
+          description: `Changes for patient ${patients.find(p=>p.id === id)?.name} have been saved.`,
+        });
+      }
     }
   };
 

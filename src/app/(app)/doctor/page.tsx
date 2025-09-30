@@ -40,7 +40,7 @@ const SymptomList = ({ symptoms }: { symptoms?: string }) => {
 
 
 export default function DoctorPage() {
-  const { patients, updatePatient } = usePatients();
+  const { patients, updatePatient, isLoading: arePatientsLoading } = usePatients();
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null);
   const [isSheetOpen, setSheetOpen] = React.useState(false);
   const [isAiLoading, setIsAiLoading] = React.useState(false);
@@ -82,6 +82,9 @@ export default function DoctorPage() {
     if (result.error) {
       toast({ variant: 'destructive', title: 'AI Error', description: result.error });
     } else if(result.suggestedDiagnoses) {
+      // Optimistically update the patient in the sheet
+      setSelectedPatient(prev => prev ? {...prev, aiSuggestedDiagnosis: result.suggestedDiagnoses} : null);
+      // Persist the change
       updatePatient(selectedPatient.id, { aiSuggestedDiagnosis: result.suggestedDiagnoses });
       toast({ title: 'AI Suggestion Ready', description: 'The AI has provided a diagnostic suggestion.' });
     }
@@ -100,8 +103,8 @@ export default function DoctorPage() {
     }
   };
   
-  // To update sheet content when AI suggestion arrives
-  const patientInSheet = patients.find(p => p.id === selectedPatient?.id);
+  // To update sheet content when AI suggestion arrives via context
+  const patientInSheet = patients.find(p => p.id === selectedPatient?.id) || selectedPatient;
 
   return (
     <div className="space-y-6">
@@ -126,7 +129,21 @@ export default function DoctorPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {waitingPatients.length > 0 ? waitingPatients.map((patient) => (
+             {arePatientsLoading ? (
+                Array.from({ length: 2 }).map((_, index) => (
+                  <TableRow key={index}>
+                     <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-32 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
+              ) : waitingPatients.length > 0 ? waitingPatients.map((patient) => (
                 <TableRow key={patient.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -155,17 +172,17 @@ export default function DoctorPage() {
         </CardContent>
       </Card>
       
-      <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="sm:max-w-2xl w-full p-0">
-          {patientInSheet && (
-          <div className="flex flex-col h-full">
+      <Sheet open={isSheetOpen} onOpenChange={(isOpen) => { setSheetOpen(isOpen); if (!isOpen) setSelectedPatient(null); }}>
+        <SheetContent className="sm:max-w-2xl w-full p-0 flex flex-col">
+          {patientInSheet ? (
+          <>
             <SheetHeader className="p-6">
               <SheetTitle className="text-2xl">Patient File: {patientInSheet.name}</SheetTitle>
               <SheetDescription>
-                Age: {patientInSheet.age} | Gender: {patientInSheet.gender} | Contact: {patientInSheet.contact}
+                Age: {patientInSheet.age} | Gender: {patientInPatient.gender} | Contact: {patientInSheet.contact}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex-1 overflow-y-auto px-6 space-y-6">
+            <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-6">
               <Card>
                 <CardHeader><CardTitle>Vitals & Symptoms</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
@@ -208,7 +225,7 @@ export default function DoctorPage() {
                         </div>
                         {isAiLoading && <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" /></div>}
                         {patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
-                            <p className="text-sm text-muted-foreground">{patientInSheet.aiSuggesteddiagnosis}</p>
+                            <p className="text-sm text-muted-foreground">{patientInSheet.aiSuggestedDiagnosis}</p>
                         )}
                         {!patientInSheet.aiSuggestedDiagnosis && !isAiLoading && (
                             <p className="text-sm text-muted-foreground">Click 'Get Suggestion' to use AI to analyze patient data.</p>
@@ -231,7 +248,7 @@ export default function DoctorPage() {
                             <FormMessage />
                           </FormItem>
                         )}/>
-                        <SheetFooter className="pt-4">
+                        <SheetFooter className="pt-4 bg-background sticky bottom-0 py-4">
                           <SheetClose asChild><Button variant="ghost">Cancel</Button></SheetClose>
                           <Button type="submit"><Send className="mr-2 h-4 w-4" /> Save & Discharge</Button>
                         </SheetFooter>
@@ -241,7 +258,11 @@ export default function DoctorPage() {
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>Please select a patient to review.</p>
+            </div>
           )}
         </SheetContent>
       </Sheet>
