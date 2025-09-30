@@ -37,13 +37,8 @@ type User = {
   role: 'Doctor' | 'Receptionist';
 }
 
-const initialUsers: User[] = [
-    { id: '1', name: 'Dr. Alice Smith', email: 'alice.smith@meditrack.com', role: 'Doctor' },
-    { id: '2', name: 'Bob Brown', email: 'bob.brown@meditrack.com', role: 'Receptionist' },
-];
-
 export default function AdminPage() {
-  const [users, setUsers] = React.useState<User[]>(initialUsers);
+  const [users, setUsers] = React.useState<User[]>([]);
   const [isUserDialogOpen, setUserDialogOpen] = React.useState(false);
   const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
@@ -174,7 +169,7 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {users.length > 0 ? users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -185,7 +180,13 @@ export default function AdminPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    No users created yet.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -211,7 +212,7 @@ export default function AdminPage() {
                   <FormLabel>Confirm New Password</FormLabel>
                   <FormControl><Input type="password" {...field} /></FormControl>
                   <FormMessage />
-                </FormItem>
+                </Item>
               )}/>
               <DialogFooter>
                 <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
