@@ -52,7 +52,9 @@ export async function searchMedication(data: { medicationName: string }) {
 }
 
 
-const CreateUserSchema = UserSchema;
+const CreateUserSchema = UserSchema.omit({ role: true }).extend({
+  role: z.enum(['Doctor', 'Receptionist']),
+});
 
 export async function createUser(formData: z.infer<typeof CreateUserSchema>) {
   try {
@@ -81,6 +83,46 @@ export async function createUser(formData: z.infer<typeof CreateUserSchema>) {
   } catch (e) {
     console.error(e);
     return { error: 'Failed to create user.' };
+  }
+}
+
+const CreateAdminSchema = UserSchema.omit({ role: true }).extend({
+  role: z.literal('Admin'),
+});
+
+export async function createAdminUser(formData: z.infer<typeof CreateAdminSchema>) {
+  try {
+    const validation = CreateAdminSchema.safeParse(formData);
+    if (!validation.success) {
+      return { error: 'Invalid admin data.' };
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+    const usersCollection = db.collection('users');
+
+    // Check if an admin user already exists
+    const adminExists = await usersCollection.findOne({ role: 'Admin' });
+    if (adminExists) {
+      return { error: 'An admin account has already been created. Please log in.' };
+    }
+    
+    const existingUser = await usersCollection.findOne({ email: formData.email });
+    if (existingUser) {
+      return { error: 'A user with this email already exists.' };
+    }
+
+    const hashedPassword = await bcrypt.hash(formData.password, 10);
+
+    const result = await usersCollection.insertOne({
+      ...formData,
+      password: hashedPassword,
+    });
+    
+    return { success: true, userId: result.insertedId.toString() };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to create admin user.' };
   }
 }
 

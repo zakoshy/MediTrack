@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
+import { createAdminUser } from '@/app/actions';
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -31,19 +32,25 @@ export default function SignupPage() {
     defaultValues: { name: '', email: '', password: '' },
   });
 
-  const onSubmit = (values: z.infer<typeof signupSchema>) => {
-    // For now, we'll just show a success message and log the data.
-    // In the next step, we'll save this user to the database.
-    console.log('Admin account created with:', values);
-    toast({
-      title: 'Admin Account Created',
-      description: 'You can now log in with your new credentials.',
-    });
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    const result = await createAdminUser({ ...values, role: 'Admin' });
 
-    // Redirect to login page after a short delay
-    setTimeout(() => {
-      router.push('/login');
-    }, 1500);
+    if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: result.error,
+      });
+    } else {
+      toast({
+        title: 'Admin Account Created',
+        description: 'You can now log in with your new credentials.',
+      });
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+    }
   };
 
   return (
