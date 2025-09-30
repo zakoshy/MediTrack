@@ -85,9 +85,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex-1">
                {/* Can add a global search or other header items here */}
             </div>
-            <Button asChild variant="outline">
-              <Link href="/reception">Main App</Link>
-            </Button>
           </header>
           <main className="flex-1 p-4 sm:p-6">{children}</main>
       </SidebarInset>
