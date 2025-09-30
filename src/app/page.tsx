@@ -6,24 +6,8 @@ import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { MediTrackLogo } from '@/components/icons';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
-
-const heroImages = [
-  { src: '/doctor2.jpg', alt: 'A doctor attending to a patient', hint: 'doctor patient' },
-  { src: '/doctor3.jpg', alt: 'A team of medical professionals', hint: 'hospital team' },
-  { src: '/doctor4.jpg', alt: 'A surgeon in an operating room', hint: 'surgeon operating' },
-];
 
 export default function WebHomepage() {
-  const plugin = React.useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
-  
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center bg-background sticky top-0 z-50 border-b">
@@ -42,28 +26,15 @@ export default function WebHomepage() {
       </header>
       <main className="flex-1">
         <section className="relative w-full h-[calc(100vh-3.5rem)]">
-          <Carousel
-            className="w-full h-full"
-            plugins={[plugin.current]}
-            onMouseEnter={plugin.current.stop}
-            onMouseLeave={plugin.current.reset}
-          >
-            <CarouselContent>
-              {heroImages.map((image, index) => (
-                <CarouselItem key={index}>
-                  <div className="w-full h-[calc(100vh-3.5rem)] relative">
-                    <Image
-                      src={image.src}
-                      fill
-                      alt={image.alt}
-                      data-ai-hint={image.hint}
-                      className="object-cover"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+          <div className="absolute inset-0">
+             <Image
+                src="/doctor3.jpg"
+                alt="A team of medical professionals"
+                fill
+                className="object-cover"
+                data-ai-hint="hospital team"
+              />
+          </div>
           <div className="absolute inset-0 bg-black/30 z-10" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 container px-4 md:px-6 z-20">
             <div className="flex flex-col items-center justify-center text-center space-y-4">
