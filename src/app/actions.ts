@@ -77,7 +77,7 @@ export async function createUser(formData: z.infer<typeof CreateUserSchema>) {
       password: hashedPassword,
     });
     
-    return { success: true, userId: result.insertedId };
+    return { success: true, userId: result.insertedId.toString() };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to create user.' };
