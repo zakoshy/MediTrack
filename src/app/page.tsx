@@ -35,7 +35,7 @@ export default function WebHomepage() {
                 data-ai-hint="hospital team"
               />
           </div>
-          <div className="absolute inset-0 bg-black/30 z-10" />
+          <div className="absolute inset-0 bg-black/50 z-10" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 container px-4 md:px-6 z-20">
             <div className="flex flex-col items-center justify-center text-center space-y-4">
               <div className="space-y-2">
