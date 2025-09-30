@@ -60,7 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
        <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/login" passHref>
+            <Link href="/" passHref>
               <SidebarMenuButton onClick={logout} tooltip={{ children: 'Log Out' }}>
                 <LogOut className="text-accent" />
                 <span>Log Out</span>
