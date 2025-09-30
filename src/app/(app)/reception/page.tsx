@@ -309,7 +309,7 @@ export default function ReceptionPage() {
                  <FormField control={vitalsForm.control} name="temperature" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Temperature</FormLabel>
-                    <FormControl><Input placeholder="e.g. 98.6°F" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g. 37°C" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}/>

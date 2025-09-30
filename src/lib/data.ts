@@ -26,7 +26,7 @@ export const initialPatients: Omit<Patient, '_id' | 'id'>[] = [
     status: 'Waiting for Doctor',
     medicalHistory: 'Seasonal allergies. History of migraines.',
     vitals: {
-      temperature: '99.1°F',
+      temperature: '37.2°C',
       bloodPressure: '130/85 mmHg',
       heartRate: '88 bpm',
       respiratoryRate: '20 rpm',
@@ -43,7 +43,7 @@ export const initialPatients: Omit<Patient, '_id' | 'id'>[] = [
     status: 'Discharged',
     medicalHistory: 'Type 2 Diabetes, managed with diet and medication.',
     vitals: {
-      temperature: '98.6°F',
+      temperature: '37°C',
       bloodPressure: '125/80 mmHg',
       heartRate: '75 bpm',
       respiratoryRate: '16 rpm',
@@ -73,7 +73,7 @@ export const initialPatients: Omit<Patient, '_id' | 'id'>[] = [
     status: 'Waiting for Doctor',
     medicalHistory: 'Asthma, uses inhaler as needed.',
     vitals: {
-        temperature: "98.7°F",
+        temperature: "37.1°C",
         bloodPressure: "118/76 mmHg",
         heartRate: "82 bpm",
         respiratoryRate: "18 rpm"
