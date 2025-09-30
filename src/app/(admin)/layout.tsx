@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PanelLeft, Shield } from 'lucide-react';
+import { PanelLeft, Shield, LogOut } from 'lucide-react';
 
 import {
   SidebarProvider,
@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MediTrackLogo } from '@/components/icons';
@@ -54,6 +55,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </SidebarMenu>
       </SidebarContent>
+       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Link href="/login" passHref>
+              <SidebarMenuButton tooltip={{ children: 'Log Out' }}>
+                <LogOut className="text-accent" />
+                <span>Log Out</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </>
   );
 
