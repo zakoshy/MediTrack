@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { loginUser } from '@/app/actions';
+import { useAuth } from '@/contexts/auth-context';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -24,6 +25,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const getRedirectUrl = (role: string) => {
     switch (role) {
@@ -55,6 +57,7 @@ export default function LoginPage() {
         description: result.error,
       });
     } else if (result.user) {
+      login(result.user);
       toast({
         title: 'Login Successful',
         description: `Welcome back, ${result.user.name}! Redirecting...`,

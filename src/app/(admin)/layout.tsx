@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PanelLeft, Shield, LogOut } from 'lucide-react';
 
+import { useAuth } from '@/contexts/auth-context';
 import {
   SidebarProvider,
   Sidebar,
@@ -24,6 +25,7 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { logout } = useAuth();
   
   const sidebarContent = (
     <>
@@ -59,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href="/login" passHref>
-              <SidebarMenuButton tooltip={{ children: 'Log Out' }}>
+              <SidebarMenuButton onClick={logout} tooltip={{ children: 'Log Out' }}>
                 <LogOut className="text-accent" />
                 <span>Log Out</span>
               </SidebarMenuButton>

@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, Stethoscope, Pill, PanelLeft, Shield } from 'lucide-react';
+import { ClipboardList, Stethoscope, Pill, PanelLeft, LogOut } from 'lucide-react';
 
+import { useAuth } from '@/contexts/auth-context';
 import { PatientProvider } from '@/contexts/patient-context';
 import {
   SidebarProvider,
@@ -14,19 +15,23 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { MediTrackLogo } from '@/components/icons';
 
 const navItems = [
-  { href: '/reception', label: 'Reception', icon: ClipboardList },
-  { href: '/doctor', label: "Doctor's Queue", icon: Stethoscope },
-  { href: '/medication-search', label: 'Medication Search', icon: Pill },
+  { href: '/reception', label: 'Reception', icon: ClipboardList, roles: ['Receptionist', 'Admin'] },
+  { href: '/doctor', label: "Doctor's Queue", icon: Stethoscope, roles: ['Doctor', 'Admin'] },
+  { href: '/medication-search', label: 'Medication Search', icon: Pill, roles: ['Doctor', 'Admin'] },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
   
+  const accessibleNavItems = navItems.filter(item => user && item.roles.includes(user.role));
+
   const sidebarContent = (
     <>
       <SidebarHeader>
@@ -42,7 +47,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navItems.map((item) => (
+          {accessibleNavItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} passHref>
                 <SidebarMenuButton
@@ -57,6 +62,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Link href="/login" passHref>
+              <SidebarMenuButton onClick={logout} tooltip={{ children: 'Log Out' }}>
+                <LogOut className="text-accent" />
+                <span>Log Out</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </>
   );
 
@@ -76,9 +93,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex-1">
                  {/* Can add a global search or other header items here */}
               </div>
-              <Button asChild variant="outline">
-                <Link href="/admin">Admin Panel</Link>
-              </Button>
+              {user?.role === 'Admin' && (
+                <Button asChild variant="outline">
+                  <Link href="/admin">Admin Panel</Link>
+                </Button>
+              )}
             </header>
             <main className="flex-1 p-4 sm:p-6">{children}</main>
         </SidebarInset>
