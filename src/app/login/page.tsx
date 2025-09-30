@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
+import { loginUser } from '@/app/actions';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -24,16 +25,18 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const router = useRouter();
 
-  // For now, we assume login is for an admin and redirect to the admin dashboard.
-  // This can be updated later to handle different roles.
-  const getRedirectUrl = (role: string = 'Admin') => {
+  const getRedirectUrl = (role: string) => {
     switch (role) {
-        case 'Admin': return '/admin';
-        case 'Doctor': return '/doctor';
-        case 'Receptionist': return '/reception';
-        default: return '/';
+      case 'Admin':
+        return '/admin';
+      case 'Doctor':
+        return '/doctor';
+      case 'Receptionist':
+        return '/reception';
+      default:
+        return '/';
     }
-  }
+  };
 
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -42,27 +45,32 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    // In a real app, you'd perform authentication here.
-    // For this prototype, we'll just show a success message and redirect.
-    console.log('Login successful with:', values);
-    toast({
-      title: 'Login Successful',
-      description: 'Redirecting to your dashboard...',
-    });
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const result = await loginUser(values);
 
-    // We use a timeout to allow the user to see the toast message.
-    setTimeout(() => {
-      // Hardcoding to 'Admin' for now
-      router.push(getRedirectUrl('Admin'));
-    }, 1000);
+    if (result.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: result.error,
+      });
+    } else if (result.user) {
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${result.user.name}! Redirecting...`,
+      });
+
+      setTimeout(() => {
+        router.push(getRedirectUrl(result.user.role));
+      }, 1000);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center text-center mb-6">
-           <Link href="/" className="flex items-center gap-2 mb-4">
+          <Link href="/" className="flex items-center gap-2 mb-4">
             <MediTrackLogo className="h-10 w-10 text-primary" />
             <h1 className="text-2xl font-semibold font-headline">MediTrack</h1>
           </Link>
@@ -117,14 +125,17 @@ export default function LoginPage() {
                 />
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
-                   <LogIn className="ml-2 h-4 w-4"/>
+                  <LogIn className="ml-2 h-4 w-4" />
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
         <div className="text-center mt-4 text-sm text-muted-foreground">
-          Don't have an account? <Link href="/signup" className="underline hover:text-primary">Sign Up</Link>
+          Don't have an account?{' '}
+          <Link href="/signup" className="underline hover:text-primary">
+            Sign Up
+          </Link>
         </div>
       </div>
     </div>

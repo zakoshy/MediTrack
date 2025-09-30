@@ -1,3 +1,4 @@
+
 'use server';
 
 import { suggestDiagnosis } from '@/ai/flows/ai-suggested-diagnosis';
@@ -51,7 +52,6 @@ export async function searchMedication(data: { medicationName: string }) {
   }
 }
 
-
 const CreateUserSchema = UserSchema.omit({ role: true }).extend({
   role: z.enum(['Doctor', 'Receptionist']),
 });
@@ -62,7 +62,7 @@ export async function createUser(formData: z.infer<typeof CreateUserSchema>) {
     if (!validation.success) {
       return { error: 'Invalid user data.' };
     }
-    
+
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection('users');
@@ -78,7 +78,7 @@ export async function createUser(formData: z.infer<typeof CreateUserSchema>) {
       ...formData,
       password: hashedPassword,
     });
-    
+
     return { success: true, userId: result.insertedId.toString() };
   } catch (e) {
     console.error(e);
@@ -106,7 +106,7 @@ export async function createAdminUser(formData: z.infer<typeof CreateAdminSchema
     if (adminExists) {
       return { error: 'An admin account has already been created. Please log in.' };
     }
-    
+
     const existingUser = await usersCollection.findOne({ email: formData.email });
     if (existingUser) {
       return { error: 'A user with this email already exists.' };
@@ -118,11 +118,46 @@ export async function createAdminUser(formData: z.infer<typeof CreateAdminSchema
       ...formData,
       password: hashedPassword,
     });
-    
+
     return { success: true, userId: result.insertedId.toString() };
   } catch (e) {
     console.error(e);
     return { error: 'Failed to create admin user.' };
+  }
+}
+
+const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
+
+export async function loginUser(formData: z.infer<typeof LoginSchema>) {
+  try {
+    const validation = LoginSchema.safeParse(formData);
+    if (!validation.success) {
+      return { error: 'Invalid login data.' };
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+    const usersCollection = db.collection('users');
+
+    const user = await usersCollection.findOne({ email: formData.email });
+    if (!user) {
+      return { error: 'Invalid email or password.' };
+    }
+
+    const isPasswordValid = await bcrypt.compare(formData.password, user.password);
+    if (!isPasswordValid) {
+      return { error: 'Invalid email or password.' };
+    }
+    
+    const { password, ...userWithoutPassword } = user;
+
+    return { user: JSON.parse(JSON.stringify(userWithoutPassword)) };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Login failed. Please try again.' };
   }
 }
 
@@ -144,26 +179,25 @@ const ChangePasswordSchema = z.object({
 });
 
 export async function changePassword(formData: z.infer<typeof ChangePasswordSchema>) {
-   try {
+  try {
     const validation = ChangePasswordSchema.safeParse(formData);
     if (!validation.success) {
       return { error: 'Invalid data.' };
     }
-    
+
     const { userId, password } = formData;
     const client = await clientPromise;
     const db = client.db();
     const { ObjectId } = await import('mongodb');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const result = await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { password: hashedPassword } }
-    );
-    
+
+    const result = await db
+      .collection('users')
+      .updateOne({ _id: new ObjectId(userId) }, { $set: { password: hashedPassword } });
+
     if (result.modifiedCount === 0) {
-       return { error: 'User not found or password is the same.' };
+      return { error: 'User not found or password is the same.' };
     }
 
     return { success: true };
