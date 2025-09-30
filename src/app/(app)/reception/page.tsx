@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import { PlusCircle, Stethoscope } from 'lucide-react';
@@ -46,6 +47,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import type { Patient } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const patientSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -64,7 +66,7 @@ const vitalsSchema = z.object({
 });
 
 export default function ReceptionPage() {
-  const { patients, addPatient, updatePatient } = usePatients();
+  const { patients, addPatient, updatePatient, isLoading } = usePatients();
   const [isPatientDialogOpen, setPatientDialogOpen] = React.useState(false);
   const [isVitalsDialogOpen, setVitalsDialogOpen] = React.useState(false);
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null);
@@ -213,30 +215,53 @@ export default function ReceptionPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {patients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={patient.avatarUrl} alt={patient.name} data-ai-hint="person portrait" />
-                        <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{patient.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{patient.age}</TableCell>
-                  <TableCell><Badge variant={getBadgeVariant(patient.status)}>{patient.status}</Badge></TableCell>
-                  <TableCell>{format(parseISO(patient.registeredAt), 'PPP')}</TableCell>
-                  <TableCell className="text-right">
-                    {patient.status === 'Waiting for Triage' && (
-                      <Button variant="outline" size="sm" onClick={() => handleOpenVitalsDialog(patient)}>
-                        <Stethoscope className="mr-2 h-4 w-4" />
-                        Add Vitals
-                      </Button>
-                    )}
+              {isLoading ? (
+                 Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-28 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
+              ) : patients.length > 0 ? (
+                patients.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={patient.avatarUrl} alt={patient.name} data-ai-hint="person portrait" />
+                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{patient.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{patient.age}</TableCell>
+                    <TableCell><Badge variant={getBadgeVariant(patient.status)}>{patient.status}</Badge></TableCell>
+                    <TableCell>{format(parseISO(patient.registeredAt), 'PPP')}</TableCell>
+                    <TableCell className="text-right">
+                      {patient.status === 'Waiting for Triage' && (
+                        <Button variant="outline" size="sm" onClick={() => handleOpenVitalsDialog(patient)}>
+                          <Stethoscope className="mr-2 h-4 w-4" />
+                          Add Vitals
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No patients registered yet.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

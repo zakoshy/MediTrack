@@ -1,3 +1,4 @@
+
 export type PatientStatus = 'Waiting for Triage' | 'Waiting for Doctor' | 'Discharged';
 
 export type Vitals = {
@@ -8,6 +9,7 @@ export type Vitals = {
 };
 
 export type Patient = {
+  _id: string; // From MongoDB
   id: string;
   name: string;
   age: number;

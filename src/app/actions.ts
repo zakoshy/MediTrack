@@ -7,6 +7,7 @@ import { z } from 'zod';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import { UserSchema } from '@/models/User';
+import { PatientSchema } from '@/models/Patient';
 
 const diagnosisSchema = z.object({
   symptoms: z.string(),
@@ -238,5 +239,51 @@ export async function deleteUser(formData: z.infer<typeof DeleteUserSchema>) {
   } catch (e) {
     console.error(e);
     return { error: 'Failed to delete user.' };
+  }
+}
+
+const CreatePatientSchema = PatientSchema.pick({
+  name: true,
+  age: true,
+  gender: true,
+  contact: true,
+  medicalHistory: true,
+});
+
+export async function createPatient(formData: z.infer<typeof CreatePatientSchema>) {
+  try {
+    const validation = CreatePatientSchema.safeParse(formData);
+    if (!validation.success) {
+      return { error: 'Invalid patient data.' };
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+    
+    const newPatient = {
+      ...validation.data,
+      registeredAt: new Date().toISOString(),
+      status: 'Waiting for Triage' as const,
+      avatarUrl: `https://picsum.photos/seed/p${Math.random()}/40/40`,
+    };
+
+    const result = await db.collection('patients').insertOne(newPatient);
+
+    return { patient: JSON.parse(JSON.stringify({ ...newPatient, _id: result.insertedId })) };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to create patient.' };
+  }
+}
+
+export async function getPatients() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const patients = await db.collection('patients').find({}).sort({ registeredAt: -1 }).toArray();
+    return { patients: JSON.parse(JSON.stringify(patients)) };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to fetch patients.' };
   }
 }

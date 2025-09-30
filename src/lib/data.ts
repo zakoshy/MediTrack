@@ -1,11 +1,12 @@
+
 import type { Patient } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const getImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || '';
 
-export const initialPatients: Patient[] = [
+// This data is now only for seeding/testing purposes and is not directly used by the app.
+export const initialPatients: Omit<Patient, '_id' | 'id'>[] = [
   {
-    id: '1',
     name: 'John Doe',
     age: 45,
     gender: 'Male',
@@ -16,7 +17,6 @@ export const initialPatients: Patient[] = [
     medicalHistory: 'Hypertension, diagnosed in 2020. No known allergies.',
   },
   {
-    id: '2',
     name: 'Jane Smith',
     age: 34,
     gender: 'Female',
@@ -34,7 +34,6 @@ export const initialPatients: Patient[] = [
     symptoms: 'Persistent cough for 3 days, sore throat, and occasional headaches. Reports feeling fatigued.',
   },
   {
-    id: '3',
     name: 'Michael Johnson',
     age: 52,
     gender: 'Male',
@@ -55,7 +54,6 @@ export const initialPatients: Patient[] = [
     dischargedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
   },
   {
-    id: '4',
     name: 'Emily Davis',
     age: 28,
     gender: 'Female',
@@ -66,7 +64,6 @@ export const initialPatients: Patient[] = [
     medicalHistory: 'None',
   },
     {
-    id: '5',
     name: 'Chris Lee',
     age: 41,
     gender: 'Other',
