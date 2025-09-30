@@ -76,7 +76,7 @@ export default function ReceptionPage() {
 
   const patientForm = useForm<z.infer<typeof patientSchema>>({
     resolver: zodResolver(patientSchema),
-    defaultValues: { name: '', age: undefined, gender: undefined, contact: '', medicalHistory: '' },
+    defaultValues: { name: '', age: '' as any, gender: undefined, contact: '', medicalHistory: '' },
   });
 
   const vitalsForm = useForm<z.infer<typeof vitalsSchema>>({
