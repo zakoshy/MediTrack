@@ -38,8 +38,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" size="icon" className="md:hidden">
             <PanelLeft />
           </Button>
-          <MediTrackLogo className="h-8 w-8 text-primary" />
-          <h1 className="text-xl font-semibold font-headline">MediTrack</h1>
+          <Link href="/" className="flex items-center gap-2">
+            <MediTrackLogo className="h-8 w-8 text-primary" />
+            <h1 className="text-xl font-semibold font-headline">MediTrack</h1>
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -70,8 +72,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-card px-4 sm:h-16 sm:px-6">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="md:hidden" />
-                <MediTrackLogo className="h-6 w-6 text-primary md:hidden" />
-                <h1 className="font-headline text-lg font-semibold md:hidden">MediTrack</h1>
+                 <Link href="/" className="flex items-center gap-2 md:hidden">
+                    <MediTrackLogo className="h-6 w-6 text-primary" />
+                    <h1 className="font-headline text-lg font-semibold">MediTrack</h1>
+                 </Link>
               </div>
               <div className="flex-1">
                  {/* Can add a global search or other header items here */}
