@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "patient-1",
+      "description": "Avatar for John Doe",
+      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYWxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzU5MjMxNjk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "male portrait"
+    },
+    {
+      "id": "patient-2",
+      "description": "Avatar for Jane Smith",
+      "imageUrl": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmZW1hbGUlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkyMzU5NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "female portrait"
+    },
+    {
+      "id": "patient-3",
+      "description": "Avatar for Michael Johnson",
+      "imageUrl": "https://images.unsplash.com/photo-1611459293885-f8e692ab0356?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYWxlJTIwcGVyc29ufGVufDB8fHx8MTc1OTEzNDU2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "male person"
+    },
+    {
+      "id": "patient-4",
+      "description": "Avatar for Emily Davis",
+      "imageUrl": "https://images.unsplash.com/photo-1740858606672-18ae1a96deeb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmZW1hbGUlMjBwZXJzb258ZW58MHx8fHwxNzU5MTc2NjY2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "female person"
+    },
+    {
+      "id": "patient-5",
+      "description": "Avatar for Chris Lee",
+      "imageUrl": "https://images.unsplash.com/photo-1535643302794-19c3804b874b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkyMDk1OTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
