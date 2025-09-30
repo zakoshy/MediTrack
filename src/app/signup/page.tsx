@@ -3,11 +3,11 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, UserPlus } from 'lucide-react';
 
 import { MediTrackLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -16,35 +16,34 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 
-const loginSchema = z.object({
+const signupSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
   email: z.string().email('Invalid email address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/reception';
   const [showPassword, setShowPassword] = React.useState(false);
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { name: '', email: '', password: '' },
   });
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    // In a real app, you'd perform authentication here.
-    // For this prototype, we'll just show a success message and redirect.
-    console.log('Login successful with:', values);
+  const onSubmit = (values: z.infer<typeof signupSchema>) => {
+    // For now, we'll just show a success message and log the data.
+    // In the next step, we'll save this user to the database.
+    console.log('Admin account created with:', values);
     toast({
-      title: 'Login Successful',
-      description: 'Redirecting to your dashboard...',
+      title: 'Admin Account Created',
+      description: 'You can now log in with your new credentials.',
     });
 
-    // We use a timeout to allow the user to see the toast message.
+    // Redirect to login page after a short delay
     setTimeout(() => {
-      router.push(redirectUrl);
-    }, 1000);
+      router.push('/login');
+    }, 1500);
   };
 
   return (
@@ -55,24 +54,37 @@ export default function LoginPage() {
             <MediTrackLogo className="h-10 w-10 text-primary" />
             <h1 className="text-2xl font-semibold font-headline">MediTrack</h1>
           </Link>
-          <p className="text-muted-foreground">Welcome back! Please sign in to your account.</p>
+          <p className="text-muted-foreground">Create the primary administrator account.</p>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+            <CardTitle>Create Admin Account</CardTitle>
+            <CardDescription>This will be the first user and will have administrative privileges.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Alex Smith" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="doctor@meditrack.com" {...field} />
+                        <Input type="email" placeholder="admin@meditrack.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -105,15 +117,15 @@ export default function LoginPage() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
-                   <LogIn className="ml-2 h-4 w-4"/>
+                  {form.formState.isSubmitting ? 'Creating Account...' : 'Create Admin Account'}
+                   <UserPlus className="ml-2 h-4 w-4"/>
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
-        <div className="text-center mt-4 text-sm text-muted-foreground">
-          Don't have an account? <Link href="/signup" className="underline hover:text-primary">Sign Up</Link>
+         <div className="text-center mt-4 text-sm text-muted-foreground">
+          Already have an account? <Link href="/login" className="underline hover:text-primary">Log In</Link>
         </div>
       </div>
     </div>
