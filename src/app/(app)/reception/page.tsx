@@ -1,7 +1,7 @@
 
 'use client';
 import * as React from 'react';
-import { PlusCircle, Stethoscope } from 'lucide-react';
+import { PlusCircle, Stethoscope, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -70,6 +70,7 @@ export default function ReceptionPage() {
   const [isPatientDialogOpen, setPatientDialogOpen] = React.useState(false);
   const [isVitalsDialogOpen, setVitalsDialogOpen] = React.useState(false);
   const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   const patientForm = useForm<z.infer<typeof patientSchema>>({
     resolver: zodResolver(patientSchema),
@@ -119,6 +120,10 @@ export default function ReceptionPage() {
       default: return 'secondary';
     }
   }
+
+  const filteredPatients = patients.filter(patient =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 
   return (
@@ -200,8 +205,21 @@ export default function ReceptionPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Patients</CardTitle>
-          <CardDescription>A list of all patients registered in the system.</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>All Patients</CardTitle>
+              <CardDescription>A list of all patients registered in the system.</CardDescription>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search by patient name..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -230,8 +248,8 @@ export default function ReceptionPage() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : patients.length > 0 ? (
-                patients.map((patient) => (
+              ) : filteredPatients.length > 0 ? (
+                filteredPatients.map((patient) => (
                   <TableRow key={patient.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -258,7 +276,7 @@ export default function ReceptionPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No patients registered yet.
+                    {searchTerm ? `No patients found for "${searchTerm}".` : 'No patients registered yet.'}
                   </TableCell>
                 </TableRow>
               )}
