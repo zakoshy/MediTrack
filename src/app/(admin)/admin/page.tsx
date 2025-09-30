@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { createUser, getUsers, changePassword } from '@/app/actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -33,18 +35,35 @@ const passwordSchema = z
   });
 
 type User = {
-  id: string;
+  _id: string;
   name: string;
   email: string;
-  role: 'Doctor' | 'Receptionist';
+  role: 'Doctor' | 'Receptionist' | 'Admin';
 };
 
 export default function AdminPage() {
   const [users, setUsers] = React.useState<User[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [isUserDialogOpen, setUserDialogOpen] = React.useState(false);
   const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
+
+  const fetchUsers = React.useCallback(async () => {
+    setIsLoading(true);
+    const result = await getUsers();
+    if (result.error) {
+      toast({ variant: 'destructive', title: 'Error', description: result.error });
+      setUsers([]);
+    } else {
+      setUsers(result.users || []);
+    }
+    setIsLoading(false);
+  }, []);
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const userForm = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
@@ -55,17 +74,16 @@ export default function AdminPage() {
     resolver: zodResolver(passwordSchema),
   });
 
-  const handleCreateUser = (values: z.infer<typeof userSchema>) => {
-    const newUser: User = {
-      id: (users.length + 1).toString(),
-      name: values.name,
-      email: values.email,
-      role: values.role,
-    };
-    setUsers((prev) => [...prev, newUser]);
-    toast({ title: 'User Created', description: `${values.name} has been added.` });
-    userForm.reset();
-    setUserDialogOpen(false);
+  const handleCreateUser = async (values: z.infer<typeof userSchema>) => {
+    const result = await createUser(values);
+    if (result.error) {
+      toast({ variant: 'destructive', title: 'Error Creating User', description: result.error });
+    } else {
+      toast({ title: 'User Created', description: `${values.name} has been added.` });
+      userForm.reset();
+      setUserDialogOpen(false);
+      fetchUsers(); // Refresh user list
+    }
   };
 
   const handleOpenPasswordDialog = (user: User) => {
@@ -74,15 +92,19 @@ export default function AdminPage() {
     setPasswordDialogOpen(true);
   };
 
-  const handleChangePassword = (values: z.infer<typeof passwordSchema>) => {
+  const handleChangePassword = async (values: z.infer<typeof passwordSchema>) => {
     if (selectedUser) {
-      console.log(`Changing password for ${selectedUser.name} to ${values.password}`);
-      toast({
-        title: 'Password Changed',
-        description: `Password for ${selectedUser.name} has been updated.`,
-      });
-      setPasswordDialogOpen(false);
-      setSelectedUser(null);
+      const result = await changePassword({ userId: selectedUser._id, password: values.password });
+       if (result.error) {
+        toast({ variant: 'destructive', title: 'Error', description: result.error });
+      } else {
+        toast({
+          title: 'Password Changed',
+          description: `Password for ${selectedUser.name} has been updated.`,
+        });
+        setPasswordDialogOpen(false);
+        setSelectedUser(null);
+      }
     }
   };
 
@@ -187,7 +209,9 @@ export default function AdminPage() {
                   <DialogClose asChild>
                     <Button variant="ghost">Cancel</Button>
                   </DialogClose>
-                  <Button type="submit">Create User</Button>
+                  <Button type="submit" disabled={userForm.formState.isSubmitting}>
+                    {userForm.formState.isSubmitting ? 'Creating...' : 'Create User'}
+                  </Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -211,13 +235,19 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.length > 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                     <Skeleton className="h-4 w-1/2 mx-auto" />
+                  </TableCell>
+                </TableRow>
+              ) : users.length > 0 ? (
                 users.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user._id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === 'Doctor' ? 'default' : 'secondary'}>
+                      <Badge variant={user.role === 'Doctor' ? 'default' : user.role === 'Admin' ? 'destructive' : 'secondary'}>
                         {user.role}
                       </Badge>
                     </TableCell>
@@ -284,7 +314,9 @@ export default function AdminPage() {
                 <DialogClose asChild>
                   <Button variant="ghost">Cancel</Button>
                 </DialogClose>
-                <Button type="submit">Save New Password</Button>
+                <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                    {passwordForm.formState.isSubmitting ? 'Saving...' : 'Save New Password'}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
