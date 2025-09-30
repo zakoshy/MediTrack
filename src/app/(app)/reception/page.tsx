@@ -137,6 +137,17 @@ export default function ReceptionPage() {
     patient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleUnitAppend = (
+    field: keyof z.infer<typeof vitalsSchema>,
+    unit: string,
+    e: React.FocusEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    if (value && !isNaN(Number(value))) {
+      vitalsForm.setValue(field, `${value}${unit}`);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -309,28 +320,28 @@ export default function ReceptionPage() {
                  <FormField control={vitalsForm.control} name="temperature" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Temperature</FormLabel>
-                    <FormControl><Input placeholder="e.g. 37°C" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g. 37" {...field} onBlur={(e) => handleUnitAppend('temperature', '°C', e)} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}/>
                  <FormField control={vitalsForm.control} name="bloodPressure" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Blood Pressure</FormLabel>
-                    <FormControl><Input placeholder="e.g. 120/80 mmHg" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g. 120/80" {...field} onBlur={(e) => handleUnitAppend('bloodPressure', ' mmHg', e)} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}/>
                 <FormField control={vitalsForm.control} name="heartRate" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Heart Rate</FormLabel>
-                    <FormControl><Input placeholder="e.g. 72 bpm" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g. 72" {...field} onBlur={(e) => handleUnitAppend('heartRate', ' bpm', e)}/></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}/>
                 <FormField control={vitalsForm.control} name="respiratoryRate" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Respiratory Rate</FormLabel>
-                    <FormControl><Input placeholder="e.g. 16 rpm" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g. 16" {...field} onBlur={(e) => handleUnitAppend('respiratoryRate', ' rpm', e)} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}/>
